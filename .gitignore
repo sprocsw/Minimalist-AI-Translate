@@ -4,6 +4,12 @@ node_modules/
 # 构建产物
 dist/
 
+# Vite/Parcel/工具缓存
+.vite/
+.parcel-cache/
+.cache/
+.eslintcache
+
 # 日志文件
 *.log
 npm-debug.log*

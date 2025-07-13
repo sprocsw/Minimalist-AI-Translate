@@ -18,6 +18,7 @@ interface LanguageSelectProps {
   label?: string;
   exclude?: string[];
   showAuto?: boolean;
+  style?: React.CSSProperties;
 }
 
 const LanguageSelect: React.FC<LanguageSelectProps> = ({ value, onChange, label, exclude, showAuto }) => {
@@ -35,7 +36,7 @@ const LanguageSelect: React.FC<LanguageSelectProps> = ({ value, onChange, label,
         onChange={onChange}
         placeholder={label}
         styles={{ popup: { root: { fontSize: 'var(--app-font-size)', zIndex: 9999 } } }}
-        getPopupContainer={triggerNode => document.body}
+        getPopupContainer={() => document.body}
       />
     </div>
   );

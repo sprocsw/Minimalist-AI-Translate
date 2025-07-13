@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Input, Button, message as antdMessage, Select } from 'antd';
+import { Input, Button, message as antdMessage } from 'antd';
 import { useStore } from '../store/useStore';
-import LanguageSelect, { LANGS } from './LanguageSelect';
+import LanguageSelect from './LanguageSelect';
 
 const MODEL_CONFIGS = [
   {
@@ -55,17 +55,17 @@ const inputStyle = {
 
 const ApiKeyConfig: React.FC = () => {
   const store = useStore();
-  const [inputs, setInputs] = useState({
+  const [inputs, setInputs] = useState<{ [key: string]: string }>({
     apiKey: store.apiKey || '',
     googleApiKey: store.googleApiKey || '',
     deepseekApiKey: store.deepseekApiKey || '',
   });
-  const [loading, setLoading] = useState({
+  const [loading, setLoading] = useState<{ [key: string]: boolean }>({
     apiKey: false,
     googleApiKey: false,
     deepseekApiKey: false,
   });
-  const [testResult, setTestResult] = useState({
+  const [testResult, setTestResult] = useState<{ [key: string]: string }>({
     apiKey: '',
     googleApiKey: '',
     deepseekApiKey: '',
@@ -99,8 +99,8 @@ const ApiKeyConfig: React.FC = () => {
   return (
     <div style={{ maxWidth: 480, margin: '40px auto', padding: 24, background: '#222', borderRadius: 8, boxShadow: '0 2px 8px #111', color: '#fff' }}>
       <div style={{ display: 'flex', gap: 16, marginBottom: 32, alignItems: 'center', justifyContent: 'center' }}>
-        <LanguageSelect value={myLang} onChange={setMyLang} label="我的语种" exclude={[]} style={{ fontSize: 'var(--app-font-size)' }} styles={{ popup: { root: { fontSize: 'var(--app-font-size)' } } }} />
-        <LanguageSelect value={toLang} onChange={setToLang} label="目标语种" exclude={[myLang]} style={{ fontSize: 'var(--app-font-size)' }} styles={{ popup: { root: { fontSize: 'var(--app-font-size)' } } }} />
+        <LanguageSelect value={myLang} onChange={setMyLang} label="我的语种" exclude={[]} style={{ fontSize: 'var(--app-font-size)' }} />
+        <LanguageSelect value={toLang} onChange={setToLang} label="目标语种" exclude={[myLang]} style={{ fontSize: 'var(--app-font-size)' }} />
       </div>
       <h2 style={{ color: '#fff', marginBottom: 32, textAlign: 'center', letterSpacing: 2, fontSize: 'var(--app-font-size)' }}>API Key 配置</h2>
       {contextHolder}
@@ -117,7 +117,7 @@ const ApiKeyConfig: React.FC = () => {
           />
           <Button
             type="primary"
-            onClick={() => handleSave(key, store[save])}
+            onClick={() => handleSave(key, (store as any)[save])}
             style={{ marginRight: 8, background: '#4096ff', border: 'none', fontSize: 'var(--app-font-size)' }}
           >保存</Button>
           <Button

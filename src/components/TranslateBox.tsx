@@ -1,27 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Input, Button, Select, message as antdMessage } from 'antd';
-import { CopyOutlined, SwapOutlined } from '@ant-design/icons';
 import { useStore } from '../store/useStore';
-import ModelSelect from './ModelSelect';
-import LanguageSelect, { LANGS } from './LanguageSelect';
+import { LANGS } from './LanguageSelect';
+import type { TextAreaRef } from 'antd/es/input/TextArea';
 
 const { TextArea } = Input;
 
-const TARGET_LANGS = [
-  { label: '简体中文', value: 'zh' },
-  { label: '英文', value: 'en' },
-];
-const getOppositeLang = (lang: string) => (lang === 'zh' ? 'en' : 'zh');
-
 const TranslateBox: React.FC = () => {
-  const { apiKey, addHistory, model, myLang, toLang, resultLangMode, setResultLangMode, googleApiKey, deepseekApiKey, fontSize } = useStore();
+  const { apiKey, addHistory, model, myLang, toLang, resultLangMode, setResultLangMode, googleApiKey, deepseekApiKey } = useStore();
   const [fromText, setFromText] = useState('');
   const [fromLang, setFromLang] = useState<'auto' | 'zh' | 'en'>('auto');
   const [toText, setToText] = useState('');
   const [loading, setLoading] = useState(false);
-  const inputRef = useRef<any>(null);
+  const inputRef = useRef<TextAreaRef>(null);
   const [message, contextHolder] = antdMessage.useMessage();
-  const autoTranslateRef = useRef(false);
   const [maxHeight, setMaxHeight] = useState(window.innerHeight * 0.5);
 
   useEffect(() => {
@@ -120,7 +112,7 @@ const TranslateBox: React.FC = () => {
         } else {
           setToText('翻译失败');
         }
-      } catch (e) {
+      } catch {
         setToText('请求失败');
       } finally {
         setLoading(false);
@@ -170,7 +162,7 @@ const TranslateBox: React.FC = () => {
         } else {
           setToText('翻译失败');
         }
-      } catch (e) {
+      } catch {
         setToText('请求失败');
       } finally {
         setLoading(false);
@@ -186,7 +178,7 @@ const TranslateBox: React.FC = () => {
         return;
       }
       try {
-        const prompt = `请将以下内容翻译成${LANGS.find(l => l.value === realTarget)?.label || realTarget}，只输出译文，不要解释：${input}`;
+        const prompt = `请将以下内容翻译成${LANGS.find((l: { value: string; label: string }) => l.value === realTarget)?.label || realTarget}，只输出译文，不要解释：${input}`;
         const res = await fetch('https://api.deepseek.com/chat/completions', {
           method: 'POST',
           headers: {
@@ -231,7 +223,7 @@ const TranslateBox: React.FC = () => {
         } else {
           setToText('翻译失败');
         }
-      } catch (e) {
+      } catch {
         setToText('请求失败');
       } finally {
         setLoading(false);
@@ -240,7 +232,7 @@ const TranslateBox: React.FC = () => {
     }
 
     // prompt 生成
-    const prompt = `请将以下内容翻译成${LANGS.find(l => l.value === realTarget)?.label || realTarget}，只输出译文，不要解释：${input}`;
+    const prompt = `请将以下内容翻译成${LANGS.find((l: { value: string; label: string }) => l.value === realTarget)?.label || realTarget}，只输出译文，不要解释：${input}`;
 
     try {
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -287,7 +279,7 @@ const TranslateBox: React.FC = () => {
       } else {
         setToText('翻译失败');
       }
-    } catch (e) {
+    } catch {
       setToText('请求失败');
     } finally {
       setLoading(false);
@@ -301,15 +293,6 @@ const TranslateBox: React.FC = () => {
     // eslint-disable-next-line
   }, [resultLangMode, toLang, myLang]);
 
-  // 交换语言
-  const handleSwap = () => {
-    if (fromLang === 'auto') return;
-    setFromLang(toLang as 'zh' | 'en' | 'auto');
-    // setToLang 已废弃，目标语种由 resultLangMode 控制
-    setFromText(toText);
-    setToText('');
-  };
-
   // 复制译文
   const handleCopy = () => {
     if (!toText) return;
@@ -322,14 +305,14 @@ const TranslateBox: React.FC = () => {
   if (resultLangMode === 'auto') {
     const detected = detectLang(fromText);
     if (detected === myLang) {
-      resultLangLabel = LANGS.find(l => l.value === toLang)?.label || toLang;
+      resultLangLabel = LANGS.find((l: { value: string; label: string }) => l.value === toLang)?.label || toLang;
     } else if (detected === toLang) {
-      resultLangLabel = LANGS.find(l => l.value === myLang)?.label || myLang;
+      resultLangLabel = LANGS.find((l: { value: string; label: string }) => l.value === myLang)?.label || myLang;
     } else {
-      resultLangLabel = LANGS.find(l => l.value === toLang)?.label || toLang;
+      resultLangLabel = LANGS.find((l: { value: string; label: string }) => l.value === toLang)?.label || toLang;
     }
   } else {
-    resultLangLabel = LANGS.find(l => l.value === resultLangMode)?.label || resultLangMode;
+    resultLangLabel = LANGS.find((l: { value: string; label: string }) => l.value === resultLangMode)?.label || resultLangMode;
   }
 
   return (
@@ -341,11 +324,11 @@ const TranslateBox: React.FC = () => {
           <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
             <Select
               value={fromLang}
-              options={[{ label: '自动检测', value: 'auto' }, ...LANGS.filter(l => l.value !== 'auto')]}
+              options={[{ label: '自动检测', value: 'auto' }, ...LANGS.filter((l: { value: string; label: string }) => l.value !== 'auto')]}
               style={{ width: 120, fontSize: 'var(--app-font-size)' }}
               onChange={v => setFromLang(v as 'auto' | 'zh' | 'en')}
               styles={{ popup: { root: { fontSize: 'var(--app-font-size)', zIndex: 9999 } } }}
-              getPopupContainer={triggerNode => document.body}
+              getPopupContainer={() => document.body}
             />
           </div>
           <TextArea
@@ -372,11 +355,11 @@ const TranslateBox: React.FC = () => {
           <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
             <Select
               value={resultLangMode}
-              options={[{ label: '自动检测', value: 'auto' }, ...LANGS.filter(l => l.value !== myLang)]}
+              options={[{ label: '自动检测', value: 'auto' }, ...LANGS.filter((l: { value: string; label: string }) => l.value !== myLang)]}
               style={{ width: 120, fontSize: 'var(--app-font-size)' }}
               onChange={setResultLangMode}
               styles={{ popup: { root: { fontSize: 'var(--app-font-size)', zIndex: 9999 } } }}
-              getPopupContainer={triggerNode => document.body}
+              getPopupContainer={() => document.body}
             />
             <span style={{ color: '#888', fontSize: 'var(--app-font-size)' }}>
               当前被翻译语种为 {resultLangLabel}

@@ -54,7 +54,7 @@ function App() {
   const [showConfig, setShowConfig] = useState(false);
   const { fontSize } = useStore();
   return (
-    <div style={{ minHeight: '100vh', background: '#18181c', color: '#fff', fontSize: fontSize, '--app-font-size': fontSize + 'px' }}>
+    <div style={{ minHeight: '100vh', background: '#18181c', color: '#fff', fontSize: fontSize, ['--app-font-size']: fontSize + 'px' } as React.CSSProperties}>
       <Header onOpenConfig={() => setShowConfig(true)} />
       <main style={{ padding: 32 }}>
         <TranslateBox />

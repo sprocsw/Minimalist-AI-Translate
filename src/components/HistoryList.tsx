@@ -24,7 +24,7 @@ const HistoryList: React.FC = () => {
       <ul style={{ padding: '0 16px 16px 16px', margin: 0, listStyle: 'none' }}>
         {history.map(item => (
           <li key={item.id} style={{ marginBottom: 12, borderBottom: '1px solid #333', paddingBottom: 8, position: 'relative' }}>
-            <div style={{ fontSize: 12, color: '#888', marginBottom: 4, fontSize: 'var(--app-font-size)', paddingRight: 48 }}>
+            <div style={{ color: '#888', marginBottom: 4, fontSize: 'var(--app-font-size)', paddingRight: 48 }}>
               {langLabel(item.from)} → {langLabel(item.to)} | {new Date(item.time).toLocaleString()}
               <button
                 onClick={() => removeHistory(item.id)}
