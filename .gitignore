@@ -1,0 +1,50 @@
+# 依赖目录
+node_modules/
+
+# 构建产物
+dist/
+
+# 日志文件
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Mac 系统文件
+.DS_Store
+
+# Mac 资源分叉文件
+._*
+
+# 备份和压缩包
+*.zip
+backup-*.zip
+
+# 本地环境配置
+.env
+.env.local
+.env.*.local
+
+# IDE 配置
+.vscode/
+.idea/
+*.code-workspace
+
+# 其他
+*.swp
+*.swo
+*.tmp
+
+# 覆盖常见 WebStorm/VSCode/JetBrains 等编辑器缓存
+*.iml
+*.sublime*
+
+# 覆盖测试快照
+__snapshots__/
+
+# 覆盖 coverage
+coverage/
+
+# 其他常见忽略
+Thumbs.db
