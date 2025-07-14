@@ -260,12 +260,14 @@ const TranslateBox: React.FC = () => {
           return;
         }
         if (data.data && data.data.translations && data.data.translations[0]) {
-          setToText(data.data.translations[0].translatedText);
+          const translatedText = data.data.translations[0].translatedText;
+          setToText(translatedText);
           addHistory({
             from: fromLang === 'auto' ? detected : fromLang,
             to: realTarget,
             fromText: input,
-            toText: data.data.translations[0].translatedText,
+            toText: translatedText,
+            model: 'google-api',
           });
         } else {
           setToText('翻译失败');
@@ -321,12 +323,14 @@ const TranslateBox: React.FC = () => {
           return;
         }
         if (data.choices && data.choices[0].message.content) {
-          setToText(data.choices[0].message.content.trim());
+          const translatedText = data.choices[0].message.content.trim();
+          setToText(translatedText);
           addHistory({
             from: fromLang === 'auto' ? detected : fromLang,
             to: realTarget,
             fromText: input,
-            toText: data.choices[0].message.content.trim(),
+            toText: translatedText,
+            model: 'deepseek',
           });
         } else {
           setToText('翻译失败');
@@ -351,8 +355,10 @@ const TranslateBox: React.FC = () => {
         
         // 获取具体的阿里通义模型
         const aliModelType = localStorage.getItem('ali-model-type') || 'ali-qwen-turbo';
-        // 从存储的值中提取实际模型名称
+        // 从存储的值中提取实际模型名称 - 移除 'ali-' 前缀
         const actualModel = aliModelType.replace('ali-', '');
+        
+        console.log('使用阿里通义模型:', actualModel);
         
         // 在本地开发和生产环境都能正常工作的 API 路径
         const apiUrl = import.meta.env.DEV ? '/api/aliyun-proxy' : '/api/aliyun-proxy';
@@ -364,7 +370,7 @@ const TranslateBox: React.FC = () => {
           },
           body: JSON.stringify({
             apiKey: aliApiKey,
-            model: actualModel, // 使用选定的具体模型
+            model: actualModel, // 使用正确的模型名称格式，不带前缀
             systemPrompt: systemPromptEnabled ? systemPrompt : '你是一个高质量的多语种翻译助手。',
             userPrompt: prompt
           })
@@ -375,14 +381,24 @@ const TranslateBox: React.FC = () => {
           console.error('阿里通义API错误状态码:', res.status);
           if (res.status === 401 || res.status === 403) {
             message.error('API Key 无效或无权限');
+            setToText('API Key 无效或无权限');
             setLoading(false);
             return;
           } else if (res.status === 429) {
             message.error('请求过于频繁，请稍后再试');
+            setToText('请求过于频繁，请稍后再试');
             setLoading(false);
             return;
           } else if (res.status === 500) {
-            message.error('服务器内部错误，请检查 API Key 和模型名称是否正确');
+            const errorData = await res.json();
+            const errorMessage = errorData.error?.message || '服务器内部错误';
+            message.error(`服务器错误: ${errorMessage}`);
+            setToText(`服务器错误: ${errorMessage}`);
+            setLoading(false);
+            return;
+          } else {
+            message.error(`未知错误 (${res.status})`);
+            setToText(`未知错误 (${res.status})`);
             setLoading(false);
             return;
           }
@@ -394,14 +410,20 @@ const TranslateBox: React.FC = () => {
         // 检查 API 错误
         if (data.error) {
           console.error('阿里通义API错误:', data.error);
+          const errorMessage = data.error.message || data.error.code || '未知错误';
+          
           if (data.error.code === 'invalid_api_key') {
             message.error('API Key 无效');
+            setToText('API Key 无效');
           } else if (data.error.code === 'access_denied') {
             message.error('无权访问该模型，请在阿里云控制台开通模型权限');
+            setToText('无权访问该模型，请在阿里云控制台开通模型权限');
           } else if (data.error.code === 'quota_exceeded') {
             message.error('API 额度已用完');
+            setToText('API 额度已用完');
           } else {
-            message.error(`请求失败: ${data.error.message || data.error.code || '未知错误'}`);
+            message.error(`请求失败: ${errorMessage}`);
+            setToText(`请求失败: ${errorMessage}`);
           }
           setLoading(false);
           return;
@@ -412,8 +434,8 @@ const TranslateBox: React.FC = () => {
           const translatedText = data.choices[0].message.content;
           setToText(translatedText.trim());
           addHistory({
-            from: myLang,
-            to: toLang,
+            from: fromLang === 'auto' ? detected : fromLang,
+            to: realTarget,
             fromText: input,
             toText: translatedText.trim(),
             model,
@@ -424,6 +446,7 @@ const TranslateBox: React.FC = () => {
       } catch (error) {
         console.error('阿里通义API错误:', error);
         message.error(`翻译失败: ${error instanceof Error ? error.message : '未知错误'}`);
+        setToText(`翻译失败: ${error instanceof Error ? error.message : '未知错误'}`);
       }
       setLoading(false);
       return;
@@ -473,6 +496,7 @@ const TranslateBox: React.FC = () => {
           to: realTarget,
           fromText: input,
           toText: data.choices[0].message.content.trim(),
+          model, // 添加 model 字段
         });
       } else {
         setToText('翻译失败');

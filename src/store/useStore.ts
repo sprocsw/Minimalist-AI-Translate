@@ -7,6 +7,7 @@ interface HistoryItem {
   fromText: string;
   toText: string;
   time: number;
+  model?: string; // 添加可选的 model 字段
 }
 
 interface SavedPrompt {
