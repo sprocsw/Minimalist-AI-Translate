@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import ApiKeyConfig from './components/ApiKeyConfig';
 import TranslateBox from './components/TranslateBox';
@@ -52,7 +52,21 @@ const Header: React.FC<{ onOpenConfig: () => void }> = ({ onOpenConfig }) => {
 
 function App() {
   const [showConfig, setShowConfig] = useState(false);
-  const { fontSize } = useStore();
+  const { fontSize, model, setModel } = useStore();
+  
+  // 在应用启动时检查模型设置
+  useEffect(() => {
+    // 检查是否有阿里通义模型设置
+    const storedAliModel = localStorage.getItem('ali-model-type');
+    if (storedAliModel && storedAliModel.startsWith('ali-') && model !== 'ali') {
+      console.log('应用启动: 检测到阿里通义模型设置，修正为 ali');
+      setModel('ali');
+    }
+    
+    console.log('应用启动: 当前模型设置:', model);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
   return (
     <div style={{ minHeight: '100vh', background: '#18181c', color: '#fff', fontSize: fontSize, ['--app-font-size']: fontSize + 'px' } as React.CSSProperties}>
       <Header onOpenConfig={() => setShowConfig(true)} />
@@ -66,7 +80,7 @@ function App() {
         footer={null}
         title={<span style={{ color: '#fff', fontSize: 'var(--app-font-size)' }}>API Key 配置</span>}
         centered
-        bodyStyle={{ background: '#222', borderRadius: 8, fontSize: 'var(--app-font-size)' }}
+        styles={{ body: { background: '#222', borderRadius: 8, fontSize: 'var(--app-font-size)' } }}
         width={520}
         destroyOnClose
       >

@@ -118,6 +118,12 @@ const TranslateBox: React.FC = () => {
   const [savePromptModalVisible, setSavePromptModalVisible] = useState(false);
   const [promptName, setPromptName] = useState('');
 
+  // 在组件加载时检查当前模型和 API Key 状态
+  useEffect(() => {
+    console.log('当前选择的模型:', model);
+    // 这里不做任何提示，只记录日志
+  }, [model]);
+
   // 处理选择提示词模板
   const handleSelectTemplate = (value: string) => {
     setSystemPrompt(value);
@@ -156,6 +162,23 @@ const TranslateBox: React.FC = () => {
     const input = typeof text === 'string' ? text : fromText;
     if (!input.trim()) {
       message.warning('请输入需要翻译的文本');
+      return;
+    }
+    
+    console.log('开始翻译，当前模型:', model);
+    
+    // 检查 API 是否启用
+    if (model.startsWith('gpt-') && !useStore.getState().apiStatus.openai) {
+      message.error('OpenAI API 已被禁用，请在设置中启用');
+      return;
+    } else if (model === 'google-api' && !useStore.getState().apiStatus.google) {
+      message.error('Google API 已被禁用，请在设置中启用');
+      return;
+    } else if (model === 'deepseek' && !useStore.getState().apiStatus.deepseek) {
+      message.error('DeepSeek API 已被禁用，请在设置中启用');
+      return;
+    } else if (model === 'ali' && !useStore.getState().apiStatus.ali) {
+      message.error('阿里通义 API 已被禁用，请在设置中启用');
       return;
     }
     

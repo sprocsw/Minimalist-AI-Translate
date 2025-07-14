@@ -17,6 +17,13 @@ interface SavedPrompt {
   time: number;
 }
 
+interface ApiStatus {
+  openai: boolean;
+  google: boolean;
+  deepseek: boolean;
+  ali: boolean;
+}
+
 interface StoreState {
   apiKey: string;
   setApiKey: (key: string) => void;
@@ -43,6 +50,8 @@ interface StoreState {
   savedPrompts: SavedPrompt[];
   addSavedPrompt: (name: string, content: string) => void;
   removeSavedPrompt: (id: string) => void;
+  apiStatus: ApiStatus;
+  setApiStatus: (key: keyof ApiStatus, value: boolean) => void;
 }
 
 
@@ -57,6 +66,7 @@ const DEEPSEEK_API_KEY_STORAGE = 'deepseek_api_key';
 const ALI_API_KEY_STORAGE = 'ali_api_key';
 const FONT_SIZE_STORAGE = 'font_size';
 const SAVED_PROMPTS_STORAGE = 'saved_prompts';
+const API_STATUS_STORAGE = 'api_status';
 
 function loadApiKey() {
   const raw = localStorage.getItem(API_KEY_STORAGE) || '';
@@ -160,6 +170,27 @@ function saveSavedPrompts(prompts: SavedPrompt[]) {
   localStorage.setItem(SAVED_PROMPTS_STORAGE, JSON.stringify(prompts));
 }
 
+function loadApiStatus(): ApiStatus {
+  try {
+    const saved = localStorage.getItem(API_STATUS_STORAGE);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch {}
+  
+  // 默认所有 API 都启用
+  return {
+    openai: true,
+    google: true,
+    deepseek: true,
+    ali: true
+  };
+}
+
+function saveApiStatus(status: ApiStatus) {
+  localStorage.setItem(API_STATUS_STORAGE, JSON.stringify(status));
+}
+
 export const useStore = create<StoreState>((set, get) => ({
   apiKey: loadApiKey(),
   setApiKey: (key: string) => {
@@ -243,5 +274,11 @@ export const useStore = create<StoreState>((set, get) => ({
     const newPrompts = get().savedPrompts.filter(p => p.id !== id);
     saveSavedPrompts(newPrompts);
     set({ savedPrompts: newPrompts });
+  },
+  apiStatus: loadApiStatus(),
+  setApiStatus: (key: keyof ApiStatus, value: boolean) => {
+    const newStatus = { ...get().apiStatus, [key]: value };
+    saveApiStatus(newStatus);
+    set({ apiStatus: newStatus });
   },
 }));
