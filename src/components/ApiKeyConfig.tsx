@@ -43,6 +43,17 @@ const MODEL_CONFIGS = [
       return key.length > 10;
     },
   },
+  {
+    key: 'aliApiKey',
+    label: '阿里通义',
+    placeholder: '请输入阿里通义 API Key',
+    save: 'setAliApiKey',
+    test: async (key: string) => {
+      if (!key) return false;
+      // 这里只做简单长度校验，实际可调用阿里通义 API 检查
+      return key.length > 10;
+    },
+  },
 ];
 
 const inputStyle = {
@@ -59,16 +70,19 @@ const ApiKeyConfig: React.FC = () => {
     apiKey: store.apiKey || '',
     googleApiKey: store.googleApiKey || '',
     deepseekApiKey: store.deepseekApiKey || '',
+    aliApiKey: store.aliApiKey || '',
   });
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({
     apiKey: false,
     googleApiKey: false,
     deepseekApiKey: false,
+    aliApiKey: false,
   });
   const [testResult, setTestResult] = useState<{ [key: string]: string }>({
     apiKey: '',
     googleApiKey: '',
     deepseekApiKey: '',
+    aliApiKey: '',
   });
   const [message, contextHolder] = antdMessage.useMessage();
 

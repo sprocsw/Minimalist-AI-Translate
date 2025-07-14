@@ -35,6 +35,8 @@ interface StoreState {
   setGoogleApiKey: (key: string) => void;
   deepseekApiKey: string;
   setDeepseekApiKey: (key: string) => void;
+  aliApiKey: string;
+  setAliApiKey: (key: string) => void;
   fontSize: number;
   setFontSize: (size: number) => void;
   savedPrompts: SavedPrompt[];
@@ -51,6 +53,7 @@ const TOLANG_STORAGE = 'to_lang';
 const RESULT_LANG_MODE_STORAGE = 'result_lang_mode';
 const GOOGLE_API_KEY_STORAGE = 'google_api_key';
 const DEEPSEEK_API_KEY_STORAGE = 'deepseek_api_key';
+const ALI_API_KEY_STORAGE = 'ali_api_key';
 const FONT_SIZE_STORAGE = 'font_size';
 const SAVED_PROMPTS_STORAGE = 'saved_prompts';
 
@@ -119,6 +122,18 @@ function loadDeepseekApiKey() {
 }
 function saveDeepseekApiKey(key: string) {
   localStorage.setItem(DEEPSEEK_API_KEY_STORAGE, btoa(key));
+}
+
+function loadAliApiKey() {
+  const raw = localStorage.getItem(ALI_API_KEY_STORAGE) || '';
+  try {
+    return raw ? atob(raw) : '';
+  } catch {
+    return '';
+  }
+}
+function saveAliApiKey(key: string) {
+  localStorage.setItem(ALI_API_KEY_STORAGE, btoa(key));
 }
 
 function loadFontSize() {
@@ -199,6 +214,11 @@ export const useStore = create<StoreState>((set, get) => ({
   setDeepseekApiKey: (key: string) => {
     saveDeepseekApiKey(key);
     set({ deepseekApiKey: key });
+  },
+  aliApiKey: loadAliApiKey(),
+  setAliApiKey: (key: string) => {
+    saveAliApiKey(key);
+    set({ aliApiKey: key });
   },
   fontSize: loadFontSize(),
   setFontSize: (size: number) => {
