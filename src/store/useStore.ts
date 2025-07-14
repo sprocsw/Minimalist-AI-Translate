@@ -9,6 +9,13 @@ interface HistoryItem {
   time: number;
 }
 
+interface SavedPrompt {
+  id: string;
+  name: string;
+  content: string;
+  time: number;
+}
+
 interface StoreState {
   apiKey: string;
   setApiKey: (key: string) => void;
@@ -30,6 +37,9 @@ interface StoreState {
   setDeepseekApiKey: (key: string) => void;
   fontSize: number;
   setFontSize: (size: number) => void;
+  savedPrompts: SavedPrompt[];
+  addSavedPrompt: (name: string, content: string) => void;
+  removeSavedPrompt: (id: string) => void;
 }
 
 
@@ -42,6 +52,7 @@ const RESULT_LANG_MODE_STORAGE = 'result_lang_mode';
 const GOOGLE_API_KEY_STORAGE = 'google_api_key';
 const DEEPSEEK_API_KEY_STORAGE = 'deepseek_api_key';
 const FONT_SIZE_STORAGE = 'font_size';
+const SAVED_PROMPTS_STORAGE = 'saved_prompts';
 
 function loadApiKey() {
   const raw = localStorage.getItem(API_KEY_STORAGE) || '';
@@ -121,6 +132,18 @@ function saveFontSize(size: number) {
   localStorage.setItem(FONT_SIZE_STORAGE, String(size));
 }
 
+function loadSavedPrompts(): SavedPrompt[] {
+  try {
+    return JSON.parse(localStorage.getItem(SAVED_PROMPTS_STORAGE) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveSavedPrompts(prompts: SavedPrompt[]) {
+  localStorage.setItem(SAVED_PROMPTS_STORAGE, JSON.stringify(prompts));
+}
+
 export const useStore = create<StoreState>((set, get) => ({
   apiKey: loadApiKey(),
   setApiKey: (key: string) => {
@@ -182,5 +205,22 @@ export const useStore = create<StoreState>((set, get) => ({
     const n = Math.min(36, Math.max(14, size));
     saveFontSize(n);
     set({ fontSize: n });
+  },
+  savedPrompts: loadSavedPrompts(),
+  addSavedPrompt: (name: string, content: string) => {
+    const newPrompt: SavedPrompt = {
+      id: Math.random().toString(36).slice(2),
+      name,
+      content,
+      time: Date.now(),
+    };
+    const newPrompts = [newPrompt, ...get().savedPrompts];
+    saveSavedPrompts(newPrompts);
+    set({ savedPrompts: newPrompts });
+  },
+  removeSavedPrompt: (id: string) => {
+    const newPrompts = get().savedPrompts.filter(p => p.id !== id);
+    saveSavedPrompts(newPrompts);
+    set({ savedPrompts: newPrompts });
   },
 }));
