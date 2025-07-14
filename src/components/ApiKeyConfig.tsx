@@ -10,13 +10,16 @@ interface TestResult {
   message?: string;
 }
 
+// 定义API状态键类型
+type ApiStatusKey = 'openai' | 'google' | 'deepseek' | 'ali';
+
 const MODEL_CONFIGS = [
   {
     key: 'apiKey',
     label: 'OpenAI (GPT-4o/4o Mini)',
     placeholder: '请输入 OpenAI API Key',
     save: 'setApiKey',
-    statusKey: 'openai',
+    statusKey: 'openai' as ApiStatusKey,
     test: async (key: string): Promise<TestResult> => {
       if (!key) return { success: false, message: 'API Key 不能为空' };
       try {
@@ -46,7 +49,7 @@ const MODEL_CONFIGS = [
     label: 'Google API',
     placeholder: '请输入 Google API Key',
     save: 'setGoogleApiKey',
-    statusKey: 'google',
+    statusKey: 'google' as ApiStatusKey,
     test: async (key: string): Promise<TestResult> => {
       if (!key) return { success: false, message: 'API Key 不能为空' };
       try {
@@ -79,7 +82,7 @@ const MODEL_CONFIGS = [
     label: 'DeepSeek',
     placeholder: '请输入 DeepSeek API Key',
     save: 'setDeepseekApiKey',
-    statusKey: 'deepseek',
+    statusKey: 'deepseek' as ApiStatusKey,
     test: async (key: string): Promise<TestResult> => {
       if (!key) return { success: false, message: 'API Key 不能为空' };
       try {
@@ -122,7 +125,7 @@ const MODEL_CONFIGS = [
     label: '阿里通义',
     placeholder: '请输入阿里通义 API Key',
     save: 'setAliApiKey',
-    statusKey: 'ali',
+    statusKey: 'ali' as ApiStatusKey,
     test: async (key: string): Promise<TestResult> => {
       if (!key) return { success: false, message: 'API Key 不能为空' };
       try {
@@ -227,8 +230,8 @@ const ApiKeyConfig: React.FC = () => {
   };
 
   // 处理 API 启用/禁用状态变更
-  const handleApiStatusChange = (statusKey: string, checked: boolean) => {
-    setApiStatus(statusKey as keyof typeof apiStatus, checked);
+  const handleApiStatusChange = (statusKey: ApiStatusKey, checked: boolean) => {
+    setApiStatus(statusKey, checked);
     message.success(`${checked ? '启用' : '禁用'}成功`);
   };
 
