@@ -15,6 +15,7 @@ const TranslateBox: React.FC = () => {
   const inputRef = useRef<TextAreaRef>(null);
   const [message, contextHolder] = antdMessage.useMessage();
   const [maxHeight, setMaxHeight] = useState(window.innerHeight * 0.5);
+  const [systemPrompt, setSystemPrompt] = useState('你是一个高质量的多语种翻译助手。');
 
   useEffect(() => {
     const handleResize = () => setMaxHeight(window.innerHeight * 0.5);
@@ -188,7 +189,7 @@ const TranslateBox: React.FC = () => {
           body: JSON.stringify({
             model: 'deepseek-chat',
             messages: [
-              { role: 'system', content: '你是一个高质量的多语种翻译助手。' },
+              { role: 'system', content: systemPrompt },
               { role: 'user', content: prompt },
             ],
             stream: false,
@@ -244,7 +245,7 @@ const TranslateBox: React.FC = () => {
         body: JSON.stringify({
           model,
           messages: [
-            { role: 'system', content: '你是一个高质量的多语种翻译助手。' },
+            { role: 'system', content: systemPrompt },
             { role: 'user', content: prompt },
           ],
           temperature: 0.2,
@@ -318,6 +319,19 @@ const TranslateBox: React.FC = () => {
   return (
     <div>
       {contextHolder}
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ color: '#fff', fontSize: 'var(--app-font-size)', fontWeight: 500, marginBottom: 4, display: 'block' }}>
+          系统提示词（可自定义翻译风格）
+        </label>
+        <TextArea
+          value={systemPrompt}
+          onChange={e => setSystemPrompt(e.target.value)}
+          placeholder="你是一个高质量的多语种翻译助手。"
+          style={{ fontSize: 'var(--app-font-size)' }}
+          autoSize={{ minRows: 1, maxRows: 6 }}
+          disabled={loading}
+        />
+      </div>
       {/* 移除 ModelSelect 组件 */}
       <div style={{ display: 'flex', gap: 32 }}>
         <div style={{ flex: 1 }}>
