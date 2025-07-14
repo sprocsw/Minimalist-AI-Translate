@@ -2,6 +2,9 @@ import React, { useEffect, useMemo } from 'react';
 import { Select } from 'antd';
 import { useStore } from '../store/useStore';
 
+// 定义API状态键类型
+type ApiStatusKey = 'openai' | 'google' | 'deepseek' | 'ali';
+
 const ModelSelect: React.FC = () => {
   const { model, setModel, apiStatus } = useStore();
   
@@ -54,7 +57,7 @@ const ModelSelect: React.FC = () => {
       if (model.startsWith('gpt-') && !apiStatus.openai) {
         // 如果 OpenAI 被禁用但当前模型是 OpenAI，则切换到其他可用模型
         for (const key of Object.keys(apiStatus)) {
-          if (apiStatus[key as keyof typeof apiStatus]) {
+          if (apiStatus[key as ApiStatusKey]) {
             switch (key) {
               case 'google': 
                 setModel('google-api'); 
@@ -74,7 +77,7 @@ const ModelSelect: React.FC = () => {
       } else if (model === 'google-api' && !apiStatus.google) {
         // 如果 Google API 被禁用但当前模型是 Google API
         for (const key of Object.keys(apiStatus)) {
-          if (apiStatus[key as keyof typeof apiStatus]) {
+          if (apiStatus[key as ApiStatusKey]) {
             switch (key) {
               case 'openai': 
                 setModel('gpt-4o-mini'); 
@@ -94,7 +97,7 @@ const ModelSelect: React.FC = () => {
       } else if (model === 'deepseek' && !apiStatus.deepseek) {
         // 如果 DeepSeek 被禁用但当前模型是 DeepSeek
         for (const key of Object.keys(apiStatus)) {
-          if (apiStatus[key as keyof typeof apiStatus]) {
+          if (apiStatus[key as ApiStatusKey]) {
             switch (key) {
               case 'openai': 
                 setModel('gpt-4o-mini'); 
@@ -114,7 +117,7 @@ const ModelSelect: React.FC = () => {
       } else if (model === 'ali' && !apiStatus.ali) {
         // 如果阿里通义被禁用但当前模型是阿里通义
         for (const key of Object.keys(apiStatus)) {
-          if (apiStatus[key as keyof typeof apiStatus]) {
+          if (apiStatus[key as ApiStatusKey]) {
             switch (key) {
               case 'openai': 
                 setModel('gpt-4o-mini'); 

@@ -168,16 +168,17 @@ const TranslateBox: React.FC = () => {
     console.log('开始翻译，当前模型:', model);
     
     // 检查 API 是否启用
-    if (model.startsWith('gpt-') && !useStore.getState().apiStatus.openai) {
+    const currentApiStatus = useStore.getState().apiStatus;
+    if (model.startsWith('gpt-') && !currentApiStatus.openai) {
       message.error('OpenAI API 已被禁用，请在设置中启用');
       return;
-    } else if (model === 'google-api' && !useStore.getState().apiStatus.google) {
+    } else if (model === 'google-api' && !currentApiStatus.google) {
       message.error('Google API 已被禁用，请在设置中启用');
       return;
-    } else if (model === 'deepseek' && !useStore.getState().apiStatus.deepseek) {
+    } else if (model === 'deepseek' && !currentApiStatus.deepseek) {
       message.error('DeepSeek API 已被禁用，请在设置中启用');
       return;
-    } else if (model === 'ali' && !useStore.getState().apiStatus.ali) {
+    } else if (model === 'ali' && !currentApiStatus.ali) {
       message.error('阿里通义 API 已被禁用，请在设置中启用');
       return;
     }
