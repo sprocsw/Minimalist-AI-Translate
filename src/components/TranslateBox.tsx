@@ -158,10 +158,23 @@ const TranslateBox: React.FC = () => {
       message.warning('请输入需要翻译的文本');
       return;
     }
-    if (!apiKey && model !== 'google-translate') {
+    
+    // 根据当前选择的模型检查对应的 API Key
+    if (model === 'google-api' && !googleApiKey) {
+      message.error('请先配置 Google API Key');
+      return;
+    } else if (model === 'deepseek' && !deepseekApiKey) {
+      message.error('请先配置 DeepSeek API Key');
+      return;
+    } else if (model === 'ali' && !aliApiKey) {
+      message.error('请先配置阿里通义 API Key');
+      return;
+    } else if (model !== 'google-translate' && model !== 'google-api' && model !== 'deepseek' && model !== 'ali' && !apiKey) {
+      // 只有当使用 OpenAI 模型时才检查 OpenAI API Key
       message.error('请先配置 OpenAI API Key');
       return;
     }
+    
     setLoading(true);
 
     const detected = detectLang(input);
@@ -361,7 +374,14 @@ const TranslateBox: React.FC = () => {
         console.log('使用阿里通义模型:', actualModel);
         
         // 在本地开发和生产环境都能正常工作的 API 路径
-        const apiUrl = import.meta.env.DEV ? '/api/aliyun-proxy' : '/api/aliyun-proxy';
+        const apiUrl = '/api/aliyun-proxy';
+        
+        console.log('请求阿里通义API:', {
+          apiKey: '***' + aliApiKey.substring(aliApiKey.length - 4),
+          model: actualModel,
+          systemPrompt: systemPromptEnabled ? '(已启用自定义提示词)' : '(默认提示词)',
+          userPrompt: prompt.substring(0, 30) + '...'
+        });
         
         const res = await fetch(apiUrl, {
           method: 'POST',

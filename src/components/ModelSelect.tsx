@@ -25,10 +25,12 @@ const ModelSelect: React.FC = () => {
     if (value.startsWith('ali-')) {
       // 存储具体的阿里通义模型值，但在 API 调用时使用 'ali'
       setModel('ali');
-      // 去掉前缀，存储实际的模型名称
+      // 存储实际的模型名称（包含前缀）
       localStorage.setItem('ali-model-type', value);
+      console.log('选择阿里通义模型:', value, '存储为 model=ali');
     } else {
       setModel(value);
+      console.log('选择模型:', value);
     }
   };
   
