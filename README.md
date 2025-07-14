@@ -1,74 +1,3 @@
-<<<<<<< HEAD
-# React + TypeScript + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-=======
 # TRANSLATEAI 多语种 AI 互译工具
 
 ## 项目简介
@@ -130,7 +59,7 @@ npm run dev
 
 ## API Key 配置
 - 支持 OpenAI、Google、DeepSeek 等多种 API Key
-- 在“API Key 配置”页面输入并保存，数据仅本地存储，安全可靠
+- 在"API Key 配置"页面输入并保存，数据仅本地存储，安全可靠
 - 不同模型需对应的 Key，有问题可查阅官方文档
 
 ---
@@ -147,7 +76,7 @@ npm run dev
 全局通过 CSS 变量 --app-font-size 控制，支持深色主题。
 
 ### 4. 如何作为 Chrome 插件使用？
-可用“快捷入口”插件方式，或将前端打包为 popup 页面，详见 Vercel 部署和插件开发说明。
+可用"快捷入口"插件方式，或将前端打包为 popup 页面，详见 Vercel 部署和插件开发说明。
 
 ---
 
@@ -160,4 +89,3 @@ npm run dev
 ## License
 
 MIT
->>>>>>> 128fd90 (init: 项目初始化)
