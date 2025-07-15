@@ -129,8 +129,13 @@ const MODEL_CONFIGS = [
     test: async (key: string): Promise<TestResult> => {
       if (!key) return { success: false, message: 'API Key 不能为空' };
       try {
-        // 真实检测阿里通义 API Key
+        // 使用相对路径，让浏览器自动处理基础URL
+        // 在开发环境中，会请求到开发服务器，然后由开发服务器代理到API服务器
+        // 在生产环境中，会请求到Vercel的Serverless Functions
         const apiUrl = '/api/aliyun-proxy';
+        
+        console.log('测试阿里通义API，使用URL:', apiUrl);
+        
         const res = await fetch(apiUrl, {
           method: 'POST',
           headers: {
@@ -144,21 +149,25 @@ const MODEL_CONFIGS = [
           })
         });
         
-        if (res.ok) {
+        const data = await res.json().catch(() => ({}));
+        
+        // 检查新的响应格式，判断 success 字段
+        if (data.success === true) {
           return { success: true };
         } else {
-          const data = await res.json().catch(() => ({}));
-          if (res.status === 401) {
+          // 处理错误情况
+          if (data.error?.code === 'invalid_api_key' || data.error?.type === 'invalid_request_error') {
             return { success: false, message: '无效的 API Key' };
-          } else if (res.status === 403) {
-            return { success: false, message: '无权限访问该模型' };
           } else if (data.error?.code === 'quota_exceeded') {
             return { success: false, message: 'API 额度已用完' };
+          } else if (data.error?.code === 'access_denied') {
+            return { success: false, message: '无权限访问该模型' };
           } else {
-            return { success: false, message: data.error?.message || `错误 (${res.status})` };
+            return { success: false, message: data.error?.message || '未知错误' };
           }
         }
       } catch (error) {
+        console.error('阿里通义API测试错误:', error);
         return { success: false, message: '网络错误，请检查网络连接' };
       }
     },
@@ -225,7 +234,7 @@ const ApiKeyConfig: React.FC = () => {
     } catch (error) {
       setTestResult((prev) => ({ ...prev, [key]: '测试失败' }));
     } finally {
-      setLoading((prev) => ({ ...prev, [key]: false }));
+    setLoading((prev) => ({ ...prev, [key]: false }));
     }
   };
 

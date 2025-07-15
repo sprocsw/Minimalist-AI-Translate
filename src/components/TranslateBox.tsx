@@ -167,36 +167,46 @@ const TranslateBox: React.FC = () => {
     
     console.log('开始翻译，当前模型:', model);
     
-    // 检查 API 是否启用
+    // 检查 API 是否启用及 API Key 是否存在
     const currentApiStatus = useStore.getState().apiStatus;
-    if (model.startsWith('gpt-') && !currentApiStatus.openai) {
-      message.error('OpenAI API 已被禁用，请在设置中启用');
-      return;
-    } else if (model === 'google-api' && !currentApiStatus.google) {
-      message.error('Google API 已被禁用，请在设置中启用');
-      return;
-    } else if (model === 'deepseek' && !currentApiStatus.deepseek) {
-      message.error('DeepSeek API 已被禁用，请在设置中启用');
-      return;
-    } else if (model === 'ali' && !currentApiStatus.ali) {
-      message.error('阿里通义 API 已被禁用，请在设置中启用');
-      return;
-    }
+    const currentStore = useStore.getState();
     
-    // 根据当前选择的模型检查对应的 API Key
-    if (model === 'google-api' && !googleApiKey) {
-      message.error('请先配置 Google API Key');
-      return;
-    } else if (model === 'deepseek' && !deepseekApiKey) {
-      message.error('请先配置 DeepSeek API Key');
-      return;
-    } else if (model === 'ali' && !aliApiKey) {
-      message.error('请先配置阿里通义 API Key');
-      return;
-    } else if (model !== 'google-translate' && model !== 'google-api' && model !== 'deepseek' && model !== 'ali' && !apiKey) {
-      // 只有当使用 OpenAI 模型时才检查 OpenAI API Key
-      message.error('请先配置 OpenAI API Key');
-      return;
+    if (model.startsWith('gpt-')) {
+      if (!currentApiStatus.openai) {
+        message.error('OpenAI API 已被禁用，请在设置中启用');
+        return;
+      }
+      if (!currentStore.apiKey) {
+        message.error('请先配置 OpenAI API Key');
+        return;
+      }
+    } else if (model === 'google-api') {
+      if (!currentApiStatus.google) {
+        message.error('Google API 已被禁用，请在设置中启用');
+        return;
+      }
+      if (!currentStore.googleApiKey) {
+        message.error('请先配置 Google API Key');
+        return;
+      }
+    } else if (model === 'deepseek') {
+      if (!currentApiStatus.deepseek) {
+        message.error('DeepSeek API 已被禁用，请在设置中启用');
+        return;
+      }
+      if (!currentStore.deepseekApiKey) {
+        message.error('请先配置 DeepSeek API Key');
+        return;
+      }
+    } else if (model === 'ali') {
+      if (!currentApiStatus.ali) {
+        message.error('阿里通义 API 已被禁用，请在设置中启用');
+        return;
+      }
+      if (!currentStore.aliApiKey) {
+        message.error('请先配置阿里通义 API Key');
+        return;
+      }
     }
     
     setLoading(true);
@@ -223,10 +233,16 @@ const TranslateBox: React.FC = () => {
     // Google Translate 分流
     if (model === 'google-translate') {
       try {
-        const res = await fetch('http://localhost:3001/api/google-translate', {
+        // 使用相对路径
+        const apiUrl = '/api/google-translate';
+        
+        const res = await fetch(apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text: input, to: realTarget, from: detected }),
+          // 添加CORS相关配置
+          mode: 'cors',
+          credentials: 'omit'
         });
         const data = await res.json();
         if (!res.ok) {
@@ -397,7 +413,7 @@ const TranslateBox: React.FC = () => {
         
         console.log('使用阿里通义模型:', actualModel);
         
-        // 在本地开发和生产环境都能正常工作的 API 路径
+        // 使用相对路径，让浏览器自动处理基础URL
         const apiUrl = '/api/aliyun-proxy';
         
         console.log('请求阿里通义API:', {
@@ -414,55 +430,27 @@ const TranslateBox: React.FC = () => {
           },
           body: JSON.stringify({
             apiKey: aliApiKey,
-            model: actualModel, // 使用正确的模型名称格式，不带前缀
+            model: actualModel,
             systemPrompt: systemPromptEnabled ? systemPrompt : '你是一个高质量的多语种翻译助手。',
             userPrompt: prompt
           })
         });
         
-        // 先检查网络错误
-        if (!res.ok) {
-          console.error('阿里通义API错误状态码:', res.status);
-          if (res.status === 401 || res.status === 403) {
-            message.error('API Key 无效或无权限');
-            setToText('API Key 无效或无权限');
-            setLoading(false);
-            return;
-          } else if (res.status === 429) {
-            message.error('请求过于频繁，请稍后再试');
-            setToText('请求过于频繁，请稍后再试');
-            setLoading(false);
-            return;
-          } else if (res.status === 500) {
-            const errorData = await res.json();
-            const errorMessage = errorData.error?.message || '服务器内部错误';
-            message.error(`服务器错误: ${errorMessage}`);
-            setToText(`服务器错误: ${errorMessage}`);
-            setLoading(false);
-            return;
-          } else {
-            message.error(`未知错误 (${res.status})`);
-            setToText(`未知错误 (${res.status})`);
-            setLoading(false);
-            return;
-          }
-        }
-        
         const data = await res.json();
         console.log('阿里通义API响应:', data);
         
-        // 检查 API 错误
-        if (data.error) {
+        // 检查新的响应格式，判断 success 字段
+        if (data.success === false) {
           console.error('阿里通义API错误:', data.error);
-          const errorMessage = data.error.message || data.error.code || '未知错误';
+          const errorMessage = data.error?.message || data.error?.code || '未知错误';
           
-          if (data.error.code === 'invalid_api_key') {
+          if (data.error?.code === 'invalid_api_key' || data.error?.type === 'invalid_request_error') {
             message.error('API Key 无效');
             setToText('API Key 无效');
-          } else if (data.error.code === 'access_denied') {
+          } else if (data.error?.code === 'access_denied') {
             message.error('无权访问该模型，请在阿里云控制台开通模型权限');
             setToText('无权访问该模型，请在阿里云控制台开通模型权限');
-          } else if (data.error.code === 'quota_exceeded') {
+          } else if (data.error?.code === 'quota_exceeded') {
             message.error('API 额度已用完');
             setToText('API 额度已用完');
           } else {

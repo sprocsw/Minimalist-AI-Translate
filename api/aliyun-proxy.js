@@ -32,16 +32,26 @@ export default async function handler(req, res) {
     
     // 使用阿里云通义的 OpenAI 兼容接口
     console.log('使用阿里通义 OpenAI 兼容 API');
-    console.log('模型:', model);
+    console.log('输入模型:', model);
     console.log('API Key 前4位:', apiKey.substring(0, 4) + '***');
     
     try {
-      // 调用阿里云 API - 使用正确的模型名称格式
+      // 调用阿里云 API - 使用正确的模型名称格式和基础URL
       const apiUrl = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
       console.log('调用 API URL:', apiUrl);
       
+      // 根据模型名称进行映射
+      let actualModel = model;
+      if (model === 'qwen-turbo') {
+        actualModel = 'qwen-turbo';
+      } else if (model === 'qwen-plus') {
+        actualModel = 'qwen-plus';
+      } else if (model === 'qwen-max') {
+        actualModel = 'qwen-max';
+      }
+      
       const requestBody = {
-        model: model, // 使用传入的模型名称，不需要添加前缀
+        model: actualModel,
         messages: [
           { role: 'system', content: systemPrompt || '你是一个高质量的多语种翻译助手。' },
           { role: 'user', content: userPrompt }
@@ -50,7 +60,7 @@ export default async function handler(req, res) {
       };
       
       console.log('请求体:', JSON.stringify({
-        model: model,
+        model: actualModel,
         messages: [
           { role: 'system', content: systemPrompt ? '(自定义提示词)' : '(默认提示词)' },
           { role: 'user', content: userPrompt.substring(0, 30) + '...' }
@@ -84,22 +94,35 @@ export default async function handler(req, res) {
       console.log('响应状态码:', response.status);
       console.log('响应数据:', JSON.stringify(data, null, 2));
       
-      // 检查错误
+      // 检查错误 - 即使是 401 或其他错误，我们也返回 200 状态码，但在响应中包含错误信息
+      // 这样前端可以正确处理错误，而不是收到 500 错误
       if (!response.ok) {
         console.error('阿里通义 API 错误:', data);
-        return res.status(response.status).json({
+        
+        // 返回 200 状态码，但在响应中包含错误信息
+        return res.status(200).json({
+          success: false,
           error: data.error || { message: 'Unknown error from Aliyun API' }
         });
       }
       
-      // 返回响应
-      return res.status(200).json(data);
+      // 返回成功响应
+      return res.status(200).json({
+        success: true,
+        ...data
+      });
     } catch (fetchError) {
       console.error('Fetch 错误:', fetchError);
-      return res.status(500).json({ error: `Fetch error: ${fetchError.message || 'Unknown fetch error'}` });
+      return res.status(200).json({ 
+        success: false,
+        error: `Fetch error: ${fetchError.message || 'Unknown fetch error'}` 
+      });
     }
   } catch (error) {
     console.error('代理到阿里通义 API 时出错:', error);
-    return res.status(500).json({ error: `Internal server error: ${error.message || 'Unknown error'}` });
+    return res.status(200).json({ 
+      success: false,
+      error: `Internal server error: ${error.message || 'Unknown error'}` 
+    });
   }
 } 

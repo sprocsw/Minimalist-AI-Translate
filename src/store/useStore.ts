@@ -37,6 +37,8 @@ interface StoreState {
   addHistory: (item: Omit<HistoryItem, 'id' | 'time'>) => void;
   removeHistory: (id: string) => void;
   clearHistory: () => void;
+  showHistory: boolean;
+  toggleShowHistory: () => void;
   resultLangMode: string; // 'auto' 或具体语种
   setResultLangMode: (mode: string) => void;
   googleApiKey: string;
@@ -67,6 +69,7 @@ const ALI_API_KEY_STORAGE = 'ali_api_key';
 const FONT_SIZE_STORAGE = 'font_size';
 const SAVED_PROMPTS_STORAGE = 'saved_prompts';
 const API_STATUS_STORAGE = 'api_status';
+const SHOW_HISTORY_STORAGE = 'show_history';
 
 function loadApiKey() {
   const raw = localStorage.getItem(API_KEY_STORAGE) || '';
@@ -191,6 +194,14 @@ function saveApiStatus(status: ApiStatus) {
   localStorage.setItem(API_STATUS_STORAGE, JSON.stringify(status));
 }
 
+function loadShowHistory(): boolean {
+  return localStorage.getItem(SHOW_HISTORY_STORAGE) === 'true';
+}
+
+function saveShowHistory(show: boolean) {
+  localStorage.setItem(SHOW_HISTORY_STORAGE, show.toString());
+}
+
 export const useStore = create<StoreState>((set, get) => ({
   apiKey: loadApiKey(),
   setApiKey: (key: string) => {
@@ -231,6 +242,12 @@ export const useStore = create<StoreState>((set, get) => ({
   clearHistory: () => {
     saveHistory([]);
     set({ history: [] });
+  },
+  showHistory: loadShowHistory(),
+  toggleShowHistory: () => {
+    const newValue = !get().showHistory;
+    saveShowHistory(newValue);
+    set({ showHistory: newValue });
   },
   resultLangMode: loadResultLangMode(),
   setResultLangMode: (mode: string) => {

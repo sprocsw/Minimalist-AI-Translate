@@ -6,30 +6,30 @@ import { useStore } from '../store/useStore';
 type ApiStatusKey = 'openai' | 'google' | 'deepseek' | 'ali';
 
 const ModelSelect: React.FC = () => {
-  const { model, setModel, apiStatus } = useStore();
+  const { model, setModel, apiStatus, apiKey, googleApiKey, deepseekApiKey, aliApiKey } = useStore();
   
-  // 根据 API 启用状态过滤可用的模型选项
+  // 根据 API 启用状态和 API Key 是否存在来过滤可用的模型选项
   const MODEL_OPTIONS = useMemo(() => {
     const options = [];
     
-    // OpenAI 模型
-    if (apiStatus.openai) {
+    // OpenAI 模型 - 需要 API 启用且 API Key 不为空
+    if (apiStatus.openai && apiKey) {
       options.push({ label: 'GPT-4o Mini', value: 'gpt-4o-mini' });
       options.push({ label: 'GPT-4o', value: 'gpt-4o' });
     }
     
-    // Google API
-    if (apiStatus.google) {
+    // Google API - 需要 API 启用且 API Key 不为空
+    if (apiStatus.google && googleApiKey) {
       options.push({ label: 'Google API', value: 'google-api' });
     }
     
-    // DeepSeek
-    if (apiStatus.deepseek) {
+    // DeepSeek - 需要 API 启用且 API Key 不为空
+    if (apiStatus.deepseek && deepseekApiKey) {
       options.push({ label: 'DeepSeek', value: 'deepseek' });
     }
     
-    // 阿里通义
-    if (apiStatus.ali) {
+    // 阿里通义 - 需要 API 启用且 API Key 不为空
+    if (apiStatus.ali && aliApiKey) {
       options.push({ 
         label: '阿里通义', 
         options: [
@@ -41,7 +41,7 @@ const ModelSelect: React.FC = () => {
     }
     
     return options;
-  }, [apiStatus]);
+  }, [apiStatus, apiKey, googleApiKey, deepseekApiKey, aliApiKey]);
   
   // 在组件加载时检查模型状态
   useEffect(() => {
@@ -52,93 +52,39 @@ const ModelSelect: React.FC = () => {
       setModel('ali');
     }
     
-    // 检查当前选择的模型是否可用（对应的 API 是否启用）
+    // 检查当前选择的模型是否可用（对应的 API 是否启用且有 API Key）
     const checkModelAvailability = () => {
-      if (model.startsWith('gpt-') && !apiStatus.openai) {
-        // 如果 OpenAI 被禁用但当前模型是 OpenAI，则切换到其他可用模型
-        for (const key of Object.keys(apiStatus)) {
-          if (apiStatus[key as ApiStatusKey]) {
-            switch (key) {
-              case 'google': 
-                setModel('google-api'); 
-                break;
-              case 'deepseek': 
-                setModel('deepseek'); 
-                break;
-              case 'ali': 
-                setModel('ali'); 
-                break;
-              default: 
-                break;
-            }
-            return;
-          }
+      // 检查当前模型是否可用
+      const isModelAvailable = (modelName: string): boolean => {
+        if (modelName.startsWith('gpt-')) {
+          return apiStatus.openai && !!apiKey;
+        } else if (modelName === 'google-api') {
+          return apiStatus.google && !!googleApiKey;
+        } else if (modelName === 'deepseek') {
+          return apiStatus.deepseek && !!deepseekApiKey;
+        } else if (modelName === 'ali') {
+          return apiStatus.ali && !!aliApiKey;
         }
-      } else if (model === 'google-api' && !apiStatus.google) {
-        // 如果 Google API 被禁用但当前模型是 Google API
-        for (const key of Object.keys(apiStatus)) {
-          if (apiStatus[key as ApiStatusKey]) {
-            switch (key) {
-              case 'openai': 
-                setModel('gpt-4o-mini'); 
-                break;
-              case 'deepseek': 
-                setModel('deepseek'); 
-                break;
-              case 'ali': 
-                setModel('ali'); 
-                break;
-              default: 
-                break;
-            }
-            return;
-          }
-        }
-      } else if (model === 'deepseek' && !apiStatus.deepseek) {
-        // 如果 DeepSeek 被禁用但当前模型是 DeepSeek
-        for (const key of Object.keys(apiStatus)) {
-          if (apiStatus[key as ApiStatusKey]) {
-            switch (key) {
-              case 'openai': 
-                setModel('gpt-4o-mini'); 
-                break;
-              case 'google': 
-                setModel('google-api'); 
-                break;
-              case 'ali': 
-                setModel('ali'); 
-                break;
-              default: 
-                break;
-            }
-            return;
-          }
-        }
-      } else if (model === 'ali' && !apiStatus.ali) {
-        // 如果阿里通义被禁用但当前模型是阿里通义
-        for (const key of Object.keys(apiStatus)) {
-          if (apiStatus[key as ApiStatusKey]) {
-            switch (key) {
-              case 'openai': 
-                setModel('gpt-4o-mini'); 
-                break;
-              case 'google': 
-                setModel('google-api'); 
-                break;
-              case 'deepseek': 
-                setModel('deepseek'); 
-                break;
-              default: 
-                break;
-            }
-            return;
-          }
+        return false;
+      };
+      
+      // 如果当前模型不可用，尝试切换到其他可用模型
+      if (!isModelAvailable(model)) {
+        // 尝试查找可用的模型
+        if (apiStatus.openai && apiKey) {
+          setModel('gpt-4o-mini');
+        } else if (apiStatus.google && googleApiKey) {
+          setModel('google-api');
+        } else if (apiStatus.deepseek && deepseekApiKey) {
+          setModel('deepseek');
+        } else if (apiStatus.ali && aliApiKey) {
+          setModel('ali');
         }
       }
     };
     
     checkModelAvailability();
-  }, [model, setModel, apiStatus]);
+  }, [model, setModel, apiStatus, apiKey, googleApiKey, deepseekApiKey, aliApiKey]);
   
   // 将 ali 转换为具体的阿里通义模型
   const handleModelChange = (value: string) => {
@@ -173,7 +119,7 @@ const ModelSelect: React.FC = () => {
         color: '#ff7875',
         fontSize: 'var(--app-font-size)'
       }}>
-        请启用至少一个 API
+        请配置至少一个 API
       </div>
     );
   }

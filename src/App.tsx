@@ -6,7 +6,7 @@ import HistoryList from './components/HistoryList';
 import ModelSelect from './components/ModelSelect';
 import 'antd/dist/reset.css';
 import { useStore } from './store/useStore';
-import { Modal, Button } from 'antd';
+import { Modal, Button, Switch } from 'antd';
 
 const FontSizeControl: React.FC = () => {
   const { fontSize, setFontSize } = useStore();
@@ -52,7 +52,7 @@ const Header: React.FC<{ onOpenConfig: () => void }> = ({ onOpenConfig }) => {
 
 function App() {
   const [showConfig, setShowConfig] = useState(false);
-  const { fontSize, model, setModel } = useStore();
+  const { fontSize, model, setModel, showHistory, toggleShowHistory } = useStore();
   
   // 在应用启动时检查模型设置
   useEffect(() => {
@@ -72,7 +72,20 @@ function App() {
       <Header onOpenConfig={() => setShowConfig(true)} />
       <main style={{ padding: 32 }}>
         <TranslateBox />
-        <HistoryList />
+        
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 'var(--app-font-size)' }}>历史记录</span>
+            <Switch 
+              checked={showHistory} 
+              onChange={toggleShowHistory} 
+              size="small" 
+              style={{ backgroundColor: showHistory ? '#1677ff' : 'rgba(0, 0, 0, 0.45)' }}
+            />
+          </div>
+        </div>
+        
+        {showHistory && <HistoryList />}
       </main>
       <Modal
         open={showConfig}

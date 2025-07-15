@@ -14,10 +14,9 @@ const HistoryList: React.FC = () => {
   const [message, contextHolder] = antdMessage.useMessage();
   if (!history.length) return null;
   return (
-    <div style={{ marginTop: 32, background: '#222', borderRadius: 8, boxShadow: '0 2px 8px #0002' }}>
+    <div style={{ marginTop: 16, background: '#222', borderRadius: 8, boxShadow: '0 2px 8px #0002' }}>
       {contextHolder}
       <div style={{ position: 'sticky', top: 0, zIndex: 2, background: '#222', padding: '16px 16px 0 16px', borderTopLeftRadius: 8, borderTopRightRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #333' }}>
-        <strong style={{ fontSize: 'var(--app-font-size)' }}>历史记录</strong>
         <span style={{ fontSize: 'var(--app-font-size)', color: '#888' }}>（双击内容即可复制）</span>
         <button onClick={clearHistory} style={{ fontSize: 'var(--app-font-size)' }}>清空</button>
       </div>
